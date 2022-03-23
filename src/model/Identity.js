@@ -1,7 +1,8 @@
 /**
  * Identity object, contain user info
  */
-class Identity {
+ class Identity {
+    userID = ""
     username = "";
     password = "";
 
@@ -11,11 +12,13 @@ class Identity {
 
     /**
      * Constructor
+     * @oaram userID
      * @param username
      * @param password
      * @param role
      */
-    constructor(username, password, role) {
+    constructor(userID, username, password, role) {
+        this.userID = userID
         this.username = username;
         this.password = password;
         this.role = role;
@@ -27,11 +30,12 @@ class Identity {
      * @constructor
      */
     static GetIdentity() {
+        let userID = localStorage.getItem("userID");
         let username = localStorage.getItem("username");
         let password = localStorage.getItem("password");
         let role = localStorage.getItem("role");
 
-        return new Identity(username, password);
+        return new Identity(userID, username, password);
     }
 
     /**
@@ -49,6 +53,7 @@ class Identity {
      */
     StoreIdentity() {
         if (this.username !== "") {
+            localStorage.setItem("userID", this.userID);
             localStorage.setItem("username", this.username);
             localStorage.setItem("password", this.password);
             localStorage.setItem("role", this.role);

@@ -7,12 +7,13 @@ import EditIcon from '@material-ui/icons/Edit';
 import Fab from "@material-ui/core/Fab";
 import AddIcon from "@material-ui/icons/Add";
 import contentStyles from "./styles/classContent";
+import Identity from "../model/Identity";
 import axios from "axios";
 
-
+let identity = Identity.GetIdentity();
 function Home(prop) {
     const classesContent = contentStyles();
-    const [userID, setUserID] = useState("732ea04f-20ed-431c-90b4-342195bf74c8");
+    const [userID, setUserID] = useState(identity.userID);
     const [open, setOpen] = useState(false);
     const [cardInfo, setCardInfo] = useState([]);
     const config = {

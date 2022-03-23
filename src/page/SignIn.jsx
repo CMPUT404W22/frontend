@@ -99,7 +99,7 @@ function SignIn(prop) {
                         </Form.Group>
                         <Form.Group className="mb-3">
                             <Form.Text className="text-muted">
-                                <Link to="/sign-up">Don't have an account? Sign up here -></Link>
+                                <Link to="/sign-up">Don't have an account? Sign up here</Link>
                             </Form.Text>
                         </Form.Group>
                         <Button variant="primary" onClick={() => signIn()}>

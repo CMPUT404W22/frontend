@@ -14,7 +14,7 @@ let identity = Identity.GetIdentity();
 function EditPost(props) {
     const location = useLocation();
     const [username, setUsername] = useState(identity.username);
-    const [userID, setUserID] = useState("732ea04f-20ed-431c-90b4-342195bf74c8");
+    const [userID, setUserID] = useState(identity.userID);
     const [postID, setPostID] = useState("")
     const [open, setOpen] = useState(false);
     const [title, setTitle] = useState("")

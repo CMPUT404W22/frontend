@@ -1,6 +1,12 @@
 import React, { useState } from "react";
 
 import {Button, Card, Container, Placeholder} from "react-bootstrap";
+import FormGroup from '@mui/material/FormGroup';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import FormLabel from '@mui/material/FormLabel';
+import Switch from '@mui/material/Switch';
+
+
 import { Link } from 'react-router-dom';
 
 import axios from "axios";
@@ -20,6 +26,8 @@ function CreatePost(prop) {
     const [visibility, setVisibility] = useState(0)
     const [content, setContent] = useState("")
     const [description, setDescription] = useState("")
+    const [checked, setChecked] = useState(true);
+    const [image, setimage] = useState([])
 
     const config = {
         headers: {
@@ -29,12 +37,18 @@ function CreatePost(prop) {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (checked){
+            setVisibility(0)
+        }else{
+            setVisibility(1)
+        }
         let data = {
             title : title,
             visibility: visibility,
             content: content,
             description: description,
             categories: [],
+            image: image,
             unlisted: false
         }
         try {
@@ -54,70 +68,90 @@ function CreatePost(prop) {
         window.history.back("/home")
     }
 
+    const handleChange = (event) => {
+        setChecked(event.target.checked);
+      };
+
+    function onimageChange(e) {
+        setimage([...e.target.files])
+    }
+
     return (
         <Container>
+            <h1>Create New Post</h1>
+            <h5>Post Holder : {username}</h5>
             <Card profile>
-                    <CardBody profile>
-                    <h1>Create New Post</h1>
-                    <h5>Post Holder : {username}</h5>
-                    <GridContainer>
-                      <GridItem xs={12} sm={12} md={6}>
+                <CardBody profile>
+                <GridContainer>
+                    <GridItem xs={12} sm={12} md={6}>
                         <CustomInput
-                          labelText="Post Title"
-                          id="postTitle"
-                          formControlProps={{
-                              fullWidth: true
-                          }}
-                          inputProps={{
-                              "data-testid": "test-title",
-                              value: title,
-                              onChange: (e) => setTitle(e.target.value)
-                          }}
+                            labelText="Post Title"
+                            id="postTitle"
+                            formControlProps={{
+                                fullWidth: true
+                            }}
+                            inputProps={{
+                                "data-testid": "test-title",
+                                value: title,
+                                onChange: (e) => setTitle(e.target.value)
+                            }}
                         />
-                        </GridItem>
-                        <GridItem xs={12} sm={12} md={6}>
+                    </GridItem>
+                    <FormGroup sx={{margin: 2 }}>
+                        <FormLabel component="legend" sx={{fontSize: 12}}>Visibility</FormLabel>
+                        <FormControlLabel 
+                        sx={{marginLeft: 2 }}
+                        control={<Switch checked={checked}
+                        onChange={handleChange}
+                        inputProps={{ 'aria-label': 'controlled' }} />} label="Public" />
+                    </FormGroup>
+                    <GridItem xs={12} sm={12} md={10}>
                         <CustomInput
                             labelText="Description"
                             id="description"
+                            multiline
+                            rows={2}
                             inputProps={{
                                 "data-testid": "test-des",
                                 value: description,
-                                onChange: (e) => setDescription(e.target.value)
+                                onChange: (e) => setDescription(e.target.value),
+                                multiline: true,
+                                rows: 3,
+                                variant: 'outlined'
                             }}
                             formControlProps={{
                                 fullWidth: true
                             }}
                         />
-                        </GridItem>
-                        <GridItem xs={12} sm={12} md={12}>
+                    </GridItem>
+                    <GridItem xs={12} sm={12} md={12}>
                         <CustomInput
-                          labelText="Post Content"
-                          id="content"
-                          multiline
-                          rows={4}
-                          inputProps={{ 
-                              "data-testid": "test-contennt",
-                              value: content,
-                              onChange: (e) => setContent(e.target.value),
-                              multiline: true,
-                              rows: 5,
-                              variant: 'outlined'
-                          }}
-                          formControlProps={{
-                              fullWidth: true,
-                              variant: 'outlined'
-                          }}
-                      />
-                      </GridItem>
-                    </GridContainer>
-                    <Button color="primary" round onClick={handleSubmit} >
-                        Submit
-                    </Button>
-                    <Button color="primary" round onClick={handleCancle}>
-                        Cancel
-                    </Button>
-                    </CardBody>
-                  </Card>
+                            labelText="Post Content"
+                            id="content"
+                            multiline
+                            rows={4}
+                            inputProps={{ 
+                                "data-testid": "test-contennt",
+                                value: content,
+                                onChange: (e) => setContent(e.target.value),
+                                multiline: true,
+                                rows: 5,
+                                variant: 'outlined'
+                            }}
+                            formControlProps={{
+                                fullWidth: true,
+                            }}
+                        />
+                    </GridItem>
+                </GridContainer>
+                <Button color="primary" round onClick={handleSubmit} >
+                    Submit
+                </Button>
+                <Button color="primary" round onClick={handleCancle}>
+                    Cancel
+                </Button>
+                </CardBody>
+            </Card>
         </Container>
     )
 }

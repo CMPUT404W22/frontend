@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useState, useEffect} from "react";
 
 import {Button, Card, Col, Container, FloatingLabel, Form, Modal, Row, Toast, ToastContainer} from "react-bootstrap";
 
@@ -6,10 +6,11 @@ import {Helmet} from "react-helmet";
 
 import Identity from "../model/Identity";
 import Global from "../utility/Global";
-import {AuthProvider} from "../auth/AuthProvider";
-import {Ajax} from "../utility/Ajax";
+import axios from "axios"
+import img_avatar from "./styles/img_avatar.png"
+import { Ajax } from "../utility/Ajax";
 
-let identity = Identity.GetIdentity();
+const identity = Identity.GetIdentity();
 
 function UserProfile(prop) {
     // region shared
@@ -18,67 +19,83 @@ function UserProfile(prop) {
     //endregion
 
     // region profile
-    const [firstName, setFirstName] = useState(identity.firstName);
-    const [lastName, setLastName] = useState(identity.lastName);
-    const [emailAddress, setEmailAddress] = useState(identity.emailAddress);
-    const [phoneNumber, setPhoneNumber] = useState(identity.phoneNumber);
-    const [emergencyContactName, setEmergencyContactName] = useState(identity.emergencyContactName);
-    const [emergencyContactNumber, setEmergencyContactNumber] = useState(identity.emergencyContactNumber);
-    const [profileHeader, setProfileHeader] = useState(identity.profileHeader);
-    const [pronoun, setPronoun] = useState(identity.pronoun);
+    const [userID, setUserID] = useState(identity.userID);
+    const [Username, setUsername] = useState(identity.username);
+    const [displayName, setDisplayName] = useState("");
+    const [github, setGitHub] = useState("");
     const [edit, setEdit] = useState(false);
     const [changePasswordModal, setChangePasswordModal] = useState(false);
 
-    function saveProfile () {
-        Ajax.post(
-            "user/profile/",
-            JSON.stringify({
-                "first_name": firstName,
-                "last_name": lastName,
-                "pronoun": pronoun,
-                "header": profileHeader,
-                "email": emailAddress,
-                "phone": phoneNumber,
-                "emergency_contact_name": emergencyContactName,
-                "emergency_contact_number": emergencyContactNumber,
-            }),
-            (resp) => {
-                Identity.UpdateProfile(
-                    resp["first_name"],
-                    resp["last_name"],
-                    resp["pronoun"],
-                    resp["header"],
-                    resp["email"],
-                    resp["phone"],
-                    resp["emergency_contact_name"],
-                    resp["emergency_contact_number"],
-                );
-                setShowToast(true);
-                setToastMessage("Profile Updated.");
-                setEdit(false);
-            },
-            () => {
-                setShowToast(true);
-                setToastMessage("Failed to update profile, please try again.");
-            }
-        );
+    const config = {
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    };
+
+    const auth = {
+        auth: {
+            username: identity.username,
+            password: identity.password
+        }
+    };
+
+    useEffect(() => {
+        const fetchUser = async () => {
+            try {
+                await axios.get(`http://127.0.0.1:8000/service/authors/${userID}/`, config, auth)
+               .then(function (response){
+                   let _data = response.data
+                   console.log(_data)
+                   setDisplayName(_data.displayName)
+                   setGitHub(_data.github)
+       
+               });
+               } catch (error) {
+                   console.log(error.message);
+                //    setShowToast(true)
+               }
+        }
+        fetchUser();
+      }, []);
+
+    const saveProfile = async (e) => {
+        e.preventDefault();
+        let data = {
+            displayName : displayName,
+            github: github,
+            profileImage: null
+        }
+        try {
+            console.log("user", identity.username)
+            console.log("user", identity.password)
+            let response = Ajax.post('service/authors/${userID}/', data)
+            console.log("re", response)
+            // await axios.post(`http://127.0.0.1:8000/service/authors/${userID}/`, data, config, auth)
+            // console.log("Success!")
+            // setShowToast(true)
+            
+        } catch (error) {
+            console.log(error.message);
+            // setShowToast(true)
+        }
     }
 
-    function resetProfile () {
-        identity = Identity.GetIdentity();
-
-        setFirstName(identity.firstName);
-        setLastName(identity.lastName);
-        setEmailAddress(identity.emailAddress);
-        setPhoneNumber(identity.phoneNumber);
-        setEmergencyContactName(identity.emergencyContactName);
-        setEmergencyContactNumber(identity.emergencyContactNumber);
-        setProfileHeader(identity.profileHeader);
-        setPronoun(identity.pronoun);
-        setEdit(false);
+    const resetProfile = async() => {
+        try {
+            await axios.get(`http://127.0.0.1:8000/service/authors/${userID}/`, config, auth)
+           .then(function (response){
+               let _data = response.data
+            //    console.log(_data)
+               setDisplayName(_data.displayName)
+               setGitHub(_data.github)
+   
+           });
+           } catch (error) {
+               console.log(error.message);
+            //    setShowToast(true)
+           }
+        setEdit(false)
     }
-    // endregion
-
     // region change password
     const [oldPassword, setOldPassword] = useState("");
     const [newPassword1, setNewPassword1] = useState("");
@@ -99,61 +116,27 @@ function UserProfile(prop) {
 
             {/* region profile */}
             <Card>
+            <Card.Img src={img_avatar} style={{width:"200px", borderRadius: "50%", alignSelf: 'center' }}/>
                 <Card.Body>
                     <Form>
                         <fieldset disabled={!edit}>
                             <div>
                                 <Row>
                                     <Col>
-                                        <FloatingLabel controlId="firstName" label="First Name">
-                                            <Form.Control type="text" value={firstName} onChange={(e)=>setFirstName(e.target.value)}/>
+                                        <FloatingLabel controlId="username" label="Username">
+                                            <Form.Control type="text" value={Username} onChange={(e)=>setUsername(e.target.value)}/>
                                         </FloatingLabel>
                                     </Col>
                                     <Col>
-                                        <FloatingLabel controlId="lastName" label="Last Name">
-                                            <Form.Control type="text" value={lastName} onChange={(e)=>setLastName(e.target.value)}/>
-                                        </FloatingLabel>
-                                    </Col>
-                                </Row><br/>
-                                <Row>
-                                    <Col>
-                                        <FloatingLabel controlId="pronoun" label="Pronoun">
-                                            <Form.Control type="text" value={pronoun} onChange={(e)=>setPronoun(e.target.value)}/>
+                                        <FloatingLabel controlId="displayName" label="Display Name">
+                                            <Form.Control type="text" value={displayName} onChange={(e)=>setDisplayName(e.target.value)}/>
                                         </FloatingLabel>
                                     </Col>
                                 </Row><br/>
                                 <Row>
                                     <Col>
-                                        <FloatingLabel controlId="emailAddress" label="Email Address">
-                                            <Form.Control type="email" value={emailAddress} onChange={(e)=>setEmailAddress(e.target.value)}/>
-                                        </FloatingLabel>
-                                    </Col>
-                                </Row><br/>
-                                <Row>
-                                    <Col>
-                                        <FloatingLabel controlId="phoneNumber" label="Phone Number">
-                                            <Form.Control type="phone" value={phoneNumber} onChange={(e)=>setPhoneNumber(e.target.value)}/>
-                                        </FloatingLabel>
-                                    </Col>
-                                </Row><br/>
-                                <Row>
-                                    <Col>
-                                        <FloatingLabel controlId="emergencyContactName" label="Emergency Contact Name">
-                                            <Form.Control type="text" value={emergencyContactName} onChange={(e)=>setEmergencyContactName(e.target.value)}/>
-                                        </FloatingLabel>
-                                    </Col>
-                                </Row><br/>
-                                <Row>
-                                    <Col>
-                                        <FloatingLabel controlId="emergencyContactPhone" label="Emergency Contact Phone">
-                                            <Form.Control type="phone" value={emergencyContactNumber} onChange={(e)=>setEmergencyContactNumber(e.target.value)}/>
-                                        </FloatingLabel>
-                                    </Col>
-                                </Row><br/>
-                                <Row>
-                                    <Col>
-                                        <FloatingLabel controlId="bio" label="Bio">
-                                            <Form.Control type="text" value={profileHeader} onChange={(e)=>setProfileHeader(e.target.value)}/>
+                                        <FloatingLabel controlId="Github" label="GitHub Link">
+                                            <Form.Control type="text" value={github} onChange={(e)=>setGitHub(e.target.value)}/>
                                         </FloatingLabel>
                                     </Col>
                                 </Row><br/>
