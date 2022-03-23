@@ -68,7 +68,7 @@ function UserProfile(prop) {
         try {
             console.log("user", identity.username)
             console.log("user", identity.password)
-            let response = Ajax.post('service/authors/${userID}/', data)
+            let response = Ajax.post(`service/authors/${userID}/`, data)
             console.log("re", response)
             // await axios.post(`http://127.0.0.1:8000/service/authors/${userID}/`, data, config, auth)
             // console.log("Success!")
