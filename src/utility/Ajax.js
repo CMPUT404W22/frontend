@@ -1,5 +1,3 @@
-import $ from "jquery";
-import {AuthProvider} from "../auth/AuthProvider";
 import axios from "axios";
 
 const BackendAddress = "http://127.0.0.1:8000/";
@@ -10,7 +8,7 @@ class Ajax {
      * @param path {string}
      * @returns {Promise<AxiosResponse<any>>}
      */
-    static async get(path){
+    static async get(path) {
         return axios.get(BackendAddress + path, {
             auth: {
                 username: localStorage.getItem("username"),
@@ -25,7 +23,7 @@ class Ajax {
      * @param data {object}
      * @returns {Promise<AxiosResponse<any>>}
      */
-    static async post(path, data){
+    static async post(path, data) {
         return axios.post(BackendAddress + path, data, {
             auth: {
                 username: localStorage.getItem("username"),
@@ -40,7 +38,7 @@ class Ajax {
      * @param data {object}
      * @returns {Promise<AxiosResponse<any>>}
      */
-    static async postNoAuth(path, data){
+    static async postNoAuth(path, data) {
         return axios.post(BackendAddress + path, data);
     }
 
@@ -50,7 +48,7 @@ class Ajax {
      * @param data {object}
      * @returns {Promise<AxiosResponse<any>>}
      */
-    static async put(path, data){
+    static async put(path, data) {
         return axios.put(BackendAddress + path, data, {
             auth: {
                 username: localStorage.getItem("username"),
@@ -64,8 +62,8 @@ class Ajax {
      * @param path {string}
      * @returns {Promise<AxiosResponse<any>>}
      */
-    static async delete(path){
-        return axios.put(BackendAddress + path, {
+    static async delete(path) {
+        return axios.delete(BackendAddress + path, {
             auth: {
                 username: localStorage.getItem("username"),
                 password: localStorage.getItem("password")

@@ -1,5 +1,5 @@
-import { Navigate, Outlet } from "react-router-dom";
-import React, { useState } from "react";
+import {Navigate, Outlet} from "react-router-dom";
+import React, {useState} from "react";
 import Identity from "../model/Identity";
 
 /**
@@ -22,7 +22,7 @@ const PrivateRoute = () => {
 
     // If authorized, return an outlet that will render child elements
     // If not, return element that will navigate to login page
-    return auth ? <Outlet /> : <Navigate to="/sign-in" />;
+    return auth ? <Outlet/> : <Navigate to="/sign-in"/>;
 }
 
 export default PrivateRoute;

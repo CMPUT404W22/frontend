@@ -12,14 +12,14 @@ import {Spinner} from "react-bootstrap";
 function LoadingIndicator(prop) {
     const [show, setShow] = useState(prop.show)
     const [disableScreen, setDisableScreen] = useState(prop.disableScreen)
-    
+
     useEffect(() => {
         setShow(prop.show)
         setDisableScreen(prop.disableScreen)
     }, [prop])
 
     const fullScreenStyle = {
-        position: "absolute",
+        position: "fixed",
         height: "100vh",
         width: "100vw",
         opacity: 0.8,
@@ -30,7 +30,7 @@ function LoadingIndicator(prop) {
     }
 
     const centerSpinnerStyle = {
-        position: "absolute",
+        position: "fixed",
         top: "50%",
         left: "47%",
         marginRight: "-50%",

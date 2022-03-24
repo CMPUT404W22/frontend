@@ -1,84 +1,93 @@
-import React, {useState, useEffect} from "react";
+import React, {useEffect, useState} from "react";
 
-import {Button, Card, Container, Placeholder} from "react-bootstrap";
-import { Link } from 'react-router-dom';
-import { Typography, Tooltip, IconButton } from "@material-ui/core";
-import EditIcon from '@material-ui/icons/Edit';
-import Fab from "@material-ui/core/Fab";
-import AddIcon from "@material-ui/icons/Add";
-import contentStyles from "./styles/classContent";
-import axios from "axios";
-
+import {Button, Card, Container, Modal} from "react-bootstrap";
+import {Ajax} from "../utility/Ajax";
+import Post from "../component/Post/Post";
+import PostEditor from "../component/PostEditor/PostEditor";
+import LoadingIndicator from "../component/LoadingIndicator/LoadingIndicator";
 
 function Home(prop) {
-    const classesContent = contentStyles();
-    const [userID, setUserID] = useState("732ea04f-20ed-431c-90b4-342195bf74c8");
-    const [open, setOpen] = useState(false);
-    const [cardInfo, setCardInfo] = useState([]);
-    const config = {
-      headers: {
-          'Content-Type': 'application/json'
-      }
-    };
+    // region Load posts
+    const [mode, setMode] = useState("home");
+    const [posts, setPosts] = useState([]);
+    useEffect(()=>{
+        setLoading(true);
+        if (mode === "home") {
+            Ajax.get(`service/authors/${localStorage.getItem("id")}/posts/home?type=all`)
+                .then((resp) => {
+                    setPosts(resp.data);
+                    setLoading(false);
+                }).catch(()=>alert("Error getting homepage content"));
+        } else {
+            Ajax.get(`service/authors/${localStorage.getItem("id")}/posts/home?type=explore`)
+                .then((resp) => {
+                    setPosts(resp.data);
+                    setLoading(false);
+                }).catch(()=>alert("Error getting homepage content"));
+        }
+    }, ["", mode])
+    // endregion
 
-    useEffect(() => {
-      const fetchUser = async () => {
-          try {
-            axios.get(`http://127.0.0.1:8000/service/authors/${userID}/posts/`, config)
-            .then(function (res){
-              let _data = res.data.items
-              // console.log("read:",_data)
-              setCardInfo(_data)
-     
-             });
-             } catch (error) {
-                 console.log(error.message);
-                 
-             }
-      }
-      fetchUser();
-    }, []);
+    // region Create new post
+    const [showNewPostModal, setShowNewPostModal] = useState(false);
+    // endregion
 
-    const handleSubmit = async (card, e) => {
-        let lastSegment = card.split("/").pop()
-        console.log("id", lastSegment)
-        window.location.href = `/post/${lastSegment}`
-    }
-
-    const renderCard = (card, index) => {
-        return (
-            <Card style = {{margin: '30px'}} key = {index}>
-              <Tooltip title="Edit or Delete Post" style={{ position: 'absolute', right: 5, top: 5 }}>
-                <IconButton onClick={() =>handleSubmit(card.id)}>
-                  <EditIcon className={classesContent.block} color="primary"/>
-                </IconButton>
-              </Tooltip>
-              <Card.Body>
-                <h3>{card.title}</h3>
-                <Card.Text>Author: {card.author.displayName}</Card.Text>
-                <Card.Text>Update Date: {new Intl.DateTimeFormat('en-US', {year: 'numeric', month: '2-digit',day: '2-digit', hour: '2-digit', minute: '2-digit'}).format(new Date(card.published))}</Card.Text>
-                <Card.Text>Description: {card.description}</Card.Text>
-                <Card.Text>Content: {card.content}</Card.Text>
-              </Card.Body>
-          </Card>
-        )
-      }
+    const [loading, setLoading] = useState(false);
 
     return (
-        <Container>
-          <div className={classesContent.contentWrapper}>
-              {cardInfo.length > 0 ?
-                cardInfo.map(renderCard) :
-                <Typography color="textSecondary" align="center">
-                  No post Yet
-                </Typography>
-              }
-            </div>
-          <Fab size="medium" color="primary" aria-label="add" className={classesContent.fab} component={Link} to='/post/create_post' style={{ color: "white", textDecoration: "none" }}>
-            <AddIcon />
-          </Fab>
+        <Container fluid>
+            <LoadingIndicator show={loading} disableScreen />
+            <Button onClick={()=>setShowNewPostModal(true)} style={{marginRight: 10}}>
+                New Post
+            </Button>
+            {mode === "home" ?
+                <Button onClick={()=>setMode("explore")}>
+                    Explore
+                </Button>
+                :
+                <Button onClick={()=>setMode("home")}>
+                    Home
+                </Button>
+            }
+
+
+            <Modal show={showNewPostModal} onHide={()=>setShowNewPostModal(false)} fullscreen>
+                <Modal.Header closeButton>
+                </Modal.Header>
+                <Modal.Body>
+                    <PostEditor />
+                </Modal.Body>
+            </Modal>
+
+            {
+                posts.length > 0 ?
+                    posts.map(p => {
+                        return (
+                            <Post
+                                key={p.id}
+                                type={p.type}
+                                title={p.title}
+                                id={p.id}
+                                description={p.description}
+                                contentType={p.contentType}
+                                content={p.content}
+                                author={p.author}
+                                categories={p.categories}
+                                count={p.count}
+                                comments={p.comments}
+                                published={p.published}
+                                visibility={p.visibility}
+                                unlisted={p.unlisted}
+                                image={p.image}
+                                likeCount={p.likeCount}
+                            />
+                        )
+                    })
+                    :
+                    <p className="text-center">Nothing to see here, follow someone or make a post.</p>
+            }
         </Container>
-    )
+    );
 }
 
 export default Home;

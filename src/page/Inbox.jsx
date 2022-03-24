@@ -1,6 +1,6 @@
 import React from "react";
 
-import {Button, Card, Container, Placeholder} from "react-bootstrap";
+import {Container} from "react-bootstrap";
 
 
 function Inbox(prop) {

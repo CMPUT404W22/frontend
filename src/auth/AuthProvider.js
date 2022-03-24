@@ -19,10 +19,10 @@ const AuthProvider = {
             "service/authors/login/",
             {username: username, password: password}
         ).then(function (response) {
+            console.log(response)
             let url = response.data.id
-            let lastSegment = url.split("/").pop()
-            console.log("user: ", lastSegment)
-            AuthProvider.Identity = new Identity(username, password, "user");
+            let id = url.split("/").pop()
+            AuthProvider.Identity = new Identity(username, password, "user", id);
             AuthProvider.Identity.StoreIdentity();
 
             window.location.assign("/home");

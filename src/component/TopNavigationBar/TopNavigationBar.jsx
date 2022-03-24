@@ -2,8 +2,8 @@ import React, {useState} from "react";
 
 import {Button, Container, Nav, Navbar, NavDropdown, NavItem} from "react-bootstrap";
 
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faSignOutAlt, faUserCircle } from '@fortawesome/free-solid-svg-icons'
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
+import {faSignOutAlt, faUserCircle} from '@fortawesome/free-solid-svg-icons'
 
 import Identity from "../../model/Identity";
 import {AuthProvider} from "../../auth/AuthProvider";
@@ -26,6 +26,7 @@ function TopNavigationBar(prop) {
             setAuth(UserIdentity.IsAuthenticated());
         }
     });
+
     // endregion
 
     /**
@@ -68,12 +69,12 @@ function TopNavigationBar(prop) {
                         <Nav className="d-flex">
                             <NavDropdown title="My Account" id="basic-nav-dropdown" align="end">
                                 <NavDropdown.Item href="/user-profile">
-                                    <FontAwesomeIcon icon={faUserCircle} style={{paddingRight:10}}/>
+                                    <FontAwesomeIcon icon={faUserCircle} style={{paddingRight: 10}}/>
                                     My Profile
                                 </NavDropdown.Item>
-                                <NavDropdown.Divider />
+                                <NavDropdown.Divider/>
                                 <NavDropdown.Item onClick={signOut}>
-                                    <FontAwesomeIcon icon={faSignOutAlt} style={{paddingRight:10}}/>
+                                    <FontAwesomeIcon icon={faSignOutAlt} style={{paddingRight: 10}}/>
                                     Sign Out
                                 </NavDropdown.Item>
                             </NavDropdown>

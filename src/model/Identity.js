@@ -4,7 +4,7 @@
 class Identity {
     username = "";
     password = "";
-
+    id = "";
     role = "";
 
     timezoneOffset = new Date().getTimezoneOffset();
@@ -14,11 +14,13 @@ class Identity {
      * @param username
      * @param password
      * @param role
+     * @param id
      */
-    constructor(username, password, role) {
+    constructor(username, password, role, id) {
         this.username = username;
         this.password = password;
         this.role = role;
+        this.id = id;
     }
 
     /**
@@ -30,8 +32,9 @@ class Identity {
         let username = localStorage.getItem("username");
         let password = localStorage.getItem("password");
         let role = localStorage.getItem("role");
+        let id = localStorage.getItem("id");
 
-        return new Identity(username, password);
+        return new Identity(username, password, role, id);
     }
 
     /**
@@ -52,6 +55,7 @@ class Identity {
             localStorage.setItem("username", this.username);
             localStorage.setItem("password", this.password);
             localStorage.setItem("role", this.role);
+            localStorage.setItem("id", this.id);
 
             return true;
         }
@@ -74,16 +78,6 @@ class Identity {
      */
     IsAuthenticated() {
         return this.username !== "" && this.username != null;
-    }
-
-    /**
-     * Update identity
-     * @constructor
-     */
-    static UpdateProfile(username, password, role) {
-        localStorage.setItem("firstName", username);
-        localStorage.setItem("lastName", password);
-        localStorage.setItem("emailAddress", role);
     }
 }
 
