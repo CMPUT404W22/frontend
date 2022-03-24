@@ -9,7 +9,7 @@ import ReactCommonmark from "react-commonmark";
 import PostEditor from "../PostEditor/PostEditor";
 
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faPencil} from "@fortawesome/free-solid-svg-icons";
+import {faPencil, faTrashCan} from "@fortawesome/free-solid-svg-icons";
 
 import "../../utility/NodeUtilities";
 
@@ -109,6 +109,14 @@ function Post(prop) {
             });
     }
 
+    function deletePost() {
+        //TODO
+    }
+
+    function getLink() {
+        alert(`https://cmput404-w22-project-frontend.herokuapp.com/post?id=${prop.id.slice(-36)}`)
+    }
+
     return (
         <>
             <Modal show={showEditor} onHide={()=>setShowEditor(false)} fullscreen>
@@ -143,15 +151,20 @@ function Post(prop) {
                         <i className="text-muted" style={{fontSize: 13}}>
                             by{" "}
                             <a className="hover" style={{color: "grey", textDecoration: "underline"}} onClick={displayProfile}>
-                                {prop.author.displayName ?? prop.author.display_name}
+                                {prop.author.displayName ?? prop.author.display_name ?? "Unknown Author"}
                             </a>
                         </i>
                         {prop.author.id.slice(-36) === Identity.GetIdentity().id ?
-                            <FontAwesomeIcon icon={faPencil}
-                                             className="float-end hover"
-                                             color="grey"
-                                             onClick={()=>setShowEditor(true)}
-                            />
+                            <>
+                                <FontAwesomeIcon icon={faPencil}
+                                                 className="float-end hover"
+                                                 color="grey"
+                                                 onClick={()=>setShowEditor(true)}
+                                />
+                                <a className="float-end" onClick={deletePost}>
+                                    <FontAwesomeIcon icon={faTrashCan} color="grey"/>
+                                </a>
+                            </>
                             :
                             ""
                         }
@@ -167,6 +180,14 @@ function Post(prop) {
                     <div>
                         <span className="text-muted" style={{fontSize: 10}}>{prop.categories?.toString() ?? ""}</span>
                         <span className="float-end hover" onClick={openComments} style={{textDecoration: "underline"}}>{prop.count}  comments</span>
+                    </div>
+                    <div>
+                        {
+                            prop.visibility === "Public" ?
+                                <span className="text-muted" style={{fontSize: 10, textDecoration: "underline"}} onClick={getLink}>Get Link</span>
+                                :
+                                ""
+                        }
                     </div>
                 </Card.Footer>
             </Card>
