@@ -110,7 +110,13 @@ function Post(prop) {
     }
 
     function deletePost() {
-        //TODO
+        Ajax.delete(
+            `service/authors/${Identity.GetIdentity().id}/posts/${prop.id.slice(-36)}}`
+        ).then((resp) => {
+            window.location.reload();
+        }).catch(error => {
+            alert("Failed to delete post");
+        });
     }
 
     function getLink() {
@@ -155,16 +161,19 @@ function Post(prop) {
                             </a>
                         </i>
                         {prop.author.id.slice(-36) === Identity.GetIdentity().id ?
-                            <>
+                            <div className="float-end">
                                 <FontAwesomeIcon icon={faPencil}
-                                                 className="float-end hover"
+                                                 className="hover"
                                                  color="grey"
+                                                 style={{marginRight: 10}}
                                                  onClick={()=>setShowEditor(true)}
                                 />
-                                <a className="float-end" onClick={deletePost}>
-                                    <FontAwesomeIcon icon={faTrashCan} color="grey"/>
-                                </a>
-                            </>
+                                <FontAwesomeIcon icon={faTrashCan}
+                                                 className="hover"
+                                                 color="grey"
+                                                 onClick={deletePost}
+                                />
+                            </div>
                             :
                             ""
                         }
