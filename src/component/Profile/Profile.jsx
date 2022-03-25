@@ -31,6 +31,7 @@ function Profile(prop) {
     const [edit, setEdit] = useState(false);
     const [loading, setLoading] = useState(false);
     const [following, setFollowing] = useState(false);
+    const [buttonText, setButtonText] = useState("Follow");
 
     useEffect(() => {
         if (prop.content === undefined) { // viewing their own profile
@@ -89,14 +90,22 @@ function Profile(prop) {
     }
 
     function sendFollowRequest() {
-        setFollowing(true);
-        // TODO send request
+        //setFollowing(true);
+        setButtonText("Requested")
     }
 
     function removeFollowing() {
         setFollowing(false);
-        // remove from database
+        Ajax.delete(
+            `service/authors/${prop.content.id.slice(-36)}/followers/${Identity.GetIdentity().id}`
+        ).then(resp => {
+            window.location.reload();
+        }).catch(error => {
+            alert("Failed to remove follower.")
+            setTimeout(()=>window.location.reload(), 4000);
+        })
     }
+
 
     // endregion
 
@@ -132,8 +141,9 @@ function Profile(prop) {
                                                 </Button>
                                                 :
                                                 <Button onClick={sendFollowRequest}>
-                                                    Follow
+                                                    {buttonText}
                                                 </Button>
+
                                         }
                                     </Col>
 
