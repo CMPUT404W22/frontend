@@ -88,6 +88,16 @@ function Profile(prop) {
         setEdit(false);
     }
 
+    function sendFollowRequest() {
+        setFollowing(true);
+        // TODO send request
+    }
+
+    function removeFollowing() {
+        setFollowing(false);
+        // remove from database
+    }
+
     // endregion
 
     return (
@@ -117,11 +127,11 @@ function Profile(prop) {
                                     <Col style={{textAlign:"center"}}>
                                         {
                                             following ?
-                                                <Button>
+                                                <Button onClick={removeFollowing}>
                                                     Unfollow
                                                 </Button>
                                                 :
-                                                <Button>
+                                                <Button onClick={sendFollowRequest}>
                                                     Follow
                                                 </Button>
                                         }
