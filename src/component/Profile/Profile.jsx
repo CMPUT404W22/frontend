@@ -90,8 +90,39 @@ function Profile(prop) {
     }
 
     function sendFollowRequest() {
-        //setFollowing(true);
+        // sends a follow request
+        let user;
+        let to_follow;
+        let summary;
+
         setButtonText("Requested")
+        // gets the user author object
+        Ajax.get(`service/authors/${Identity.GetIdentity().id}/`)
+            .then(resp => {
+                user = resp.data;
+                Ajax.get(`service/authors/${prop.content.id.slice(-36)}/`)
+                    // gets the author the user wants to follow
+                    .then (resp => {
+                        to_follow = resp.data;
+                        summary = user.displayName + " wants to follow " + to_follow.displayName;
+                        Ajax.post(
+                            // sends a follow notification to the author to follow's inbox
+                            `service/authors/${prop.content.id.slice(-36)}/inbox`,
+                            {
+                                type: "follow",
+                                summary: summary,
+                                actor: user,
+                                object: to_follow,
+                            }
+                        ).then((resp) => {
+                            setLoading(false);
+                        }).catch(error => {
+                            alert("Failed to send followers request");
+                        });
+                    });
+        }).catch(error => {
+            alert("Failed to get author data")
+        });
     }
 
     function removeFollowing() {
