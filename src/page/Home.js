@@ -35,7 +35,7 @@ function Home(prop) {
     const [loading, setLoading] = useState(false);
 
     return (
-        <Container fluid>
+        <Container>
             <LoadingIndicator show={loading} disableScreen />
             <Button onClick={()=>setShowNewPostModal(true)} style={{marginRight: 10}}>
                 New Post
@@ -80,6 +80,7 @@ function Home(prop) {
                                 unlisted={p.unlisted}
                                 image={p.image}
                                 likeCount={p.likeCount}
+                                commentsSrc={p.commentsSrc}
                             />
                         )
                     })

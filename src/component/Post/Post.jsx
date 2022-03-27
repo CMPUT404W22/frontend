@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from "react";
 
-import {Card, Modal} from "react-bootstrap";
+import {Card, Col, Modal, Row, Form, InputGroup} from "react-bootstrap";
 
 import DOMPurify from 'dompurify';
 
@@ -9,7 +9,7 @@ import ReactCommonmark from "react-commonmark";
 import PostEditor from "../PostEditor/PostEditor";
 
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faPencil, faTrashCan} from "@fortawesome/free-solid-svg-icons";
+import {faPencil, faTrashCan, faShareNodes, faCopy} from "@fortawesome/free-solid-svg-icons";
 
 import "../../utility/NodeUtilities";
 
@@ -28,6 +28,7 @@ function Post(prop) {
     const [showComments, setShowComments] = useState(false);
     const [comments, setComments] = useState([]);
     const [commentElements, setCommentElements] = useState(<></>);
+    const [showSharing, setShowSharing] = useState(false);
 
     const [likeCount, setLikeCount] = useState(0);
 
@@ -53,7 +54,14 @@ function Post(prop) {
         setLikeCount(prop.likeCount);
 
         // get comments
-        getComments();
+        if (prop.commentsSrc !== undefined) {
+            setComments(prop.commentsSrc.comments ?? prop.commentsSrc);
+        } else {
+            getComments();
+        }
+
+        // get likes
+        if (prop.id.getNodeOrigin() !== "local") getLikes();
     }, [""]);
 
     function displayProfile(){
@@ -100,13 +108,29 @@ function Post(prop) {
     }
 
     function getComments() {
-        Ajax.get(`service/authors/${Identity.GetIdentity().id}/posts/${prop.id.slice(-36)}/comments?origin=${prop.id.getNodeOrigin()}&page=0&size=9999`)
+        Ajax.get(`service/authors/${prop.id.getAuthorId()[0]}/posts/${prop.id.getPostId()[0]}/comments?origin=${prop.id.getNodeOrigin()}&page=0&size=9999`)
             .then((resp) => {
-                setComments(resp.data.comments);
+                setComments(resp.data.comments ?? resp.data.items);
             })
             .catch(error => {
                 alert("Failed to get comments.");
             });
+    }
+
+    function getLikes() {
+        Ajax.get(`service/authors/${prop.id.getAuthorId()[0]}/posts/${prop.id.getPostId()[0]}/likes?origin=${prop.id.getNodeOrigin()}`)
+            .then((resp) => {
+                let likes = resp.data.items ?? resp.data.likes ?? undefined
+                setLikeCount(likes.length);
+            })
+            .catch(error => {
+                alert("Failed to get likes.");
+                console.log(error)
+            });
+    }
+
+    function getFriends() {
+        Ajax.get(`service/authors/${Identity.GetIdentity().id}/friends`)
     }
 
     function deletePost() {
@@ -115,16 +139,17 @@ function Post(prop) {
         ).then((resp) => {
             window.location.reload();
         }).catch(error => {
-            alert("Failed to delete post");
+            alert("Failed to deleted post");
         });
     }
 
-    function getLink() {
-        alert(`https://cmput404-w22-project-frontend.herokuapp.com/post?id=${prop.id.slice(-36)}`)
+    function sharePostToAuthor() {
+        setShowSharing(true);
     }
 
     return (
         <>
+            {/* Post editor modal */}
             <Modal show={showEditor} onHide={()=>setShowEditor(false)} fullscreen>
                 <Modal.Header closeButton>
                 </Modal.Header>
@@ -133,6 +158,7 @@ function Post(prop) {
                 </Modal.Body>
             </Modal>
 
+            {/* User profile modal */}
             <Modal show={showProfile} onHide={()=>setShowProfile(false)} fullscreen>
                 <Modal.Header closeButton>
                 </Modal.Header>
@@ -141,12 +167,49 @@ function Post(prop) {
                 </Modal.Body>
             </Modal>
 
+            {/* Comments modal */}
             <Modal show={showComments} onHide={()=>setShowComments(false)} fullscreen>
                 <Modal.Header closeButton>
                 </Modal.Header>
                 <Modal.Body>
                     {commentElements}
-                    <CommentEditor id={prop.id}/>
+                    {
+                        prop.id.getNodeOrigin() === "local" ?
+                            <CommentEditor id={prop.id}/>
+                            :
+                            ""
+                    }
+                </Modal.Body>
+            </Modal>
+
+            {/* Sharing modal */}
+            <Modal show={showSharing} onHide={()=>setShowSharing(false)} centered>
+                <Modal.Header closeButton>
+                    Sharing
+                </Modal.Header>
+                <Modal.Body>
+                    <Row>
+                        <Col>
+                            <InputGroup>
+                                <Form.Control id="sharable-link" type="text" value={`https://cmput404-w22-project-frontend.herokuapp.com/post?id=${prop.id.slice(-36)}`} disabled/>
+                                <InputGroup.Text>
+                                    <FontAwesomeIcon icon={faCopy}
+                                                     color={"grey"}
+                                                     className="hover"
+                                                     onClick={()=>{
+                                                         let copyText = document.getElementById("sharable-link");
+                                                         copyText.select();
+                                                         copyText.setSelectionRange(0, 99999);
+                                                         navigator.clipboard.writeText(copyText.value).then(() => console.log("Link Copied: " + copyText.value));
+                                                     }}
+                                    />
+                                </InputGroup.Text>
+                            </InputGroup>
+                        </Col>
+                        <Row>
+
+                        </Row>
+                    </Row>
                 </Modal.Body>
             </Modal>
 
@@ -162,6 +225,12 @@ function Post(prop) {
                         </i>
                         {prop.author.id.slice(-36) === Identity.GetIdentity().id ?
                             <div className="float-end">
+                                <FontAwesomeIcon icon={faShareNodes}
+                                                 className="hover"
+                                                 color="grey"
+                                                 style={{marginRight: 10}}
+                                                 onClick={()=>setShowSharing(true)}
+                                />
                                 <FontAwesomeIcon icon={faPencil}
                                                  className="hover"
                                                  color="grey"
@@ -185,18 +254,10 @@ function Post(prop) {
                 </Card.Body>
                 <Card.Footer>
                     <span className="text-muted" style={{fontSize: 10}}>{new Date(Date.parse(prop.published)).toString()}</span>
-                    <span className="float-end hover" onClick={likePost} style={{textDecoration: "underline"}}>{likeCount}  likes</span>
+                    <span className="float-end hover" onClick={likePost} style={{textDecoration: "underline"}}>{likeCount ?? "Unknown"}  likes</span>
                     <div>
                         <span className="text-muted" style={{fontSize: 10}}>{prop.categories?.toString() ?? ""}</span>
-                        <span className="float-end hover" onClick={openComments} style={{textDecoration: "underline"}}>{prop.count}  comments</span>
-                    </div>
-                    <div>
-                        {
-                            prop.visibility === "Public" ?
-                                <span className="text-muted" style={{fontSize: 10, textDecoration: "underline"}} onClick={getLink}>Get Link</span>
-                                :
-                                ""
-                        }
+                        <span className="float-end hover" onClick={openComments} style={{textDecoration: "underline"}}>{comments?.length ?? prop.count}  comments</span>
                     </div>
                 </Card.Footer>
             </Card>
