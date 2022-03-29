@@ -1,13 +1,10 @@
 import React from "react";
 
-import {Container} from "react-bootstrap";
-
+import Inbox from "../component/Inbox/Inbox";
 
 function Inbox(prop) {
     return (
-        <Container>
-            Inbox
-        </Container>
+        <Inbox/>
     )
 }
 
