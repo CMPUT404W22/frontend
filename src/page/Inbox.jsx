@@ -1,10 +1,10 @@
 import React from "react";
 
-import Inbox from "../component/Inbox/Inbox";
+import Notification from "../component/Notification/Notification";
 
 function Inbox(prop) {
     return (
-        <Inbox/>
+        <Notification/>
     )
 }
 
