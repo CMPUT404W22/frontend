@@ -92,7 +92,6 @@ function Notification(prop) {
         <LoadingIndicator show={loading} disableScreen/>
         <Button id="delete-all" variant="primary" onClick={deleteAllNotifications}>DELETE ALL</Button>
 
-        
         Here are your notifications:
 
         <ListItem component="div" disablePadding>
