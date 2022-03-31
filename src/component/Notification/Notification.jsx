@@ -49,15 +49,19 @@ function Notification(prop) {
             var children = [];
 
             for (var i = 0; i < items.length; i++) {
-                const type = items[i]["type"].toUpperCase();
-                let text = type + ": ";
+                const notification = items[i];
 
-                if(type === "LIKE" || type === "FOLLOW"){
-                    text += items["summary"];
+                const type = notification["type"].toUpperCase();
+                let text = "";
+
+                if(type === "LIKE"){
+                    text += type + ": " + notification["summary"];
+                } else if(type === "FOLLOW"){
+                    text += type + " REQUEST: " + notification["summary"];
                 } else if(type === "POST"){
-                    text += `${items["author"]["displayName"]} made a post: "${items["title"]}"`;
+                    text += type + ": " + `${notification["author"]["displayName"]} made a post, titled "${notification["title"]}"`;
                 } else if(type === "COMMENT"){
-                    text += `${items["author"]["displayName"]} commented: "${items["comment"]}"`;
+                    text += type + ": " + `${notification["author"]["displayName"]} commented: "${notification["comment"]}"`;
                 } else {
                     throw new Error("invalid notification type saved in db");
                 }
@@ -71,7 +75,6 @@ function Notification(prop) {
 
             setInbox(<div id="notification-list">{children}</div>);
             setLoading(false);
-            window.location.reload();
         }).catch(error => {
             setLoading(false);
             alert("Failed to get notifications: ", error);            
@@ -81,7 +84,7 @@ function Notification(prop) {
     return (
     <Container>
         <LoadingIndicator show={loading} disableScreen/>
-        {/* <Button id="delete-all" onClick={deleteAllNotifications()}>DELETE ALL</Button> */}
+        <Button id="delete-all" variant="primary" onClick={deleteAllNotifications}>DELETE ALL</Button>
 
         
         Here are your notifications:
