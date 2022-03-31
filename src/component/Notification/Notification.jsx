@@ -8,16 +8,17 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import "./Notification.css";
 
-
-
 function Notification(prop) {
-    const index = 0;
     const [loading, setLoading] = useState(false);
     const [inbox, setInbox] = useState("");
 
     useEffect(() => {
         getNotifications();
     }, []);
+
+    function goToNotification(url){
+        window.open(url);
+    }
 
     function deleteAllNotifications(){
         setLoading(true);
@@ -53,21 +54,26 @@ function Notification(prop) {
 
                 const type = notification["type"].toUpperCase();
                 let text = "";
+                let link = "";
 
                 if(type === "LIKE"){
                     text += type + ": " + notification["summary"];
+                    link = notification["object"];
                 } else if(type === "FOLLOW"){
                     text += type + " REQUEST: " + notification["summary"];
+                    link = notification["actor"]["url"];
                 } else if(type === "POST"){
                     text += type + ": " + `${notification["author"]["displayName"]} made a post, titled "${notification["title"]}"`;
+                    link = notification["source"];
                 } else if(type === "COMMENT"){
                     text += type + ": " + `${notification["author"]["displayName"]} commented: "${notification["comment"]}"`;
+                    link = notification["id"];
                 } else {
                     throw new Error("invalid notification type saved in db");
                 }
 
                 children.push(
-                    <ListItemButton>
+                    <ListItemButton onClick={goToNotification}>
                         <ListItemText primary={text} />
                     </ListItemButton>
                 );
