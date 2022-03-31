@@ -1,29 +1,39 @@
-import {Container} from "react-bootstrap";
+import {Container, Button} from "react-bootstrap";
 import {Ajax} from "../../utility/Ajax";
 import Identity from "../../model/Identity";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import LoadingIndicator from "../../component/LoadingIndicator/LoadingIndicator";
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
+import "./Notification.css";
+
+
 
 function Notification(prop) {
     const index = 0;
     const [loading, setLoading] = useState(false);
+    const [inbox, setInbox] = useState("");
 
+    useEffect(() => {
+        getNotifications();
+    }, []);
 
     function deleteAllNotifications(){
+        setLoading(true);
         Ajax.delete(
             `service/authors/${Identity.GetIdentity().id}/inbox`,
         ).then((resp) => {
+            setLoading(false);
             window.location.reload();
         }).catch(error => {
+            setLoading(false);
             alert("Failed to delete all notifications:", error);
         })
     }
 
     function getNotifications(){
-        var result;
+        setLoading(true);
 
         Ajax.get(
             `service/authors/${Identity.GetIdentity().id}/inbox`,
@@ -31,7 +41,9 @@ function Notification(prop) {
             const items = resp.data.items;
 
             if(items.length === 0){
-                return <ListItemText primary={"Your inbox is empty"} />;
+                setInbox(<ListItemText primary={"Your inbox is empty"} />);
+                setLoading(false);
+                return;
             }
 
             var children = [];
@@ -57,25 +69,25 @@ function Notification(prop) {
                 );
             }
 
-            return (<div>{children}</div>);
+            setInbox(<div id="notification-list">{children}</div>);
+            setLoading(false);
+            window.location.reload();
         }).catch(error => {
-            alert("Failed to get notifications: ", error);
+            setLoading(false);
+            alert("Failed to get notifications: ", error);            
         })
-    }
-
-    function viewNotificationOnClick(){
-
     }
 
     return (
     <Container>
         <LoadingIndicator show={loading} disableScreen/>
+        {/* <Button id="delete-all" onClick={deleteAllNotifications()}>DELETE ALL</Button> */}
 
         
         Here are your notifications:
 
         <ListItem component="div" disablePadding>
-            {getNotifications()}
+            {inbox}
         </ListItem>
     </Container>
     )
