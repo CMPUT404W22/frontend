@@ -17,10 +17,6 @@ function Inbox(prop) {
         getNotifications();
     }, [""]);
 
-    function goToNotification(url){
-        window.open(url);
-    }
-
     function deleteAllNotifications(){
         setLoading(true);
         Ajax.delete(
