@@ -73,15 +73,23 @@ function Post(prop) {
     }
 
     function likePost() {
-        Ajax.post(
-            `service/authors/${Identity.GetIdentity().id}/posts/${prop.id.slice(-36)}/likes?origin=${prop.id.getNodeOrigin()}`,
-            {}
+        Ajax.get(
+            `service/authors/${Identity.GetIdentity().id}`
         ).then((resp) => {
-            if (resp.data.created) {
+            Ajax.post(
+                `service/authors/${prop.author.id.getAuthorId()}/inbox`,
+                {
+                    type: "like",
+                    author: resp.data,
+                    object: prop.id,
+                    "@context": "https://www.w3.org/ns/activitystreams",
+                    summary: `${resp.displayName} liked your post`
+                }
+            ).then(resp => {
                 setLikeCount(likeCount + 1);
-            } else {
-                setLikeCount(likeCount - 1);
-            }
+            }).catch(error => {
+                alert("You already liked this post");
+            })
         }).catch(error => {
            alert("Failed to like post");
         });
@@ -100,6 +108,7 @@ function Post(prop) {
                             contentType={c.contentType}
                             id={c.id}
                             published={c.published}
+                            likeCount={c.likeCount}
                         />
                     );
                 })}

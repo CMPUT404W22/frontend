@@ -99,6 +99,7 @@ function Comment(prop) {
                 </Card.Body>
                 <Card.Footer>
                     <span className="text-muted" style={{fontSize: 10}}>{new Date(Date.parse(prop.published)).toString()}</span>
+                    <span className="float-end">{prop.likeCount ?? "Unknown"} likes</span>
                 </Card.Footer>
             </Card>
         </>
