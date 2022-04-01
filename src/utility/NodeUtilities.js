@@ -26,6 +26,9 @@ String.prototype.getCommentId = function () {
     let result = [...r];
     if (result[0] === undefined) {
         let re = this.matchAll(new RegExp(/(?<=comments\/).*/g));
+        if ([...re][0] === undefined) {
+            return undefined;
+        }
         return [...re]
     }
     return result;
