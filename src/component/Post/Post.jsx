@@ -77,13 +77,13 @@ function Post(prop) {
             `service/authors/${Identity.GetIdentity().id}`
         ).then((resp) => {
             Ajax.post(
-                `service/authors/${prop.author.id.getAuthorId()}/inbox`,
+                `service/authors/${prop.author.id.getAuthorId()}/inbox?origin=${prop.author.id.getNodeOrigin()}`,
                 {
                     type: "like",
                     author: resp.data,
                     object: prop.id,
                     "@context": "https://www.w3.org/ns/activitystreams",
-                    summary: `${resp.displayName} liked your post`
+                    summary: `${resp.data.displayName} liked your post`
                 }
             ).then(resp => {
                 setLikeCount(likeCount + 1);
@@ -100,6 +100,7 @@ function Post(prop) {
         setCommentElements(
             <>
                 {comments.map(c => {
+                    console.log(c)
                     return (
                         <Comment
                             key={c.id}

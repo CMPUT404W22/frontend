@@ -15,12 +15,16 @@ import Identity from "../../model/Identity";
 
 import Profile from "../Profile/Profile";
 import {Ajax} from "../../utility/Ajax";
+import {set} from "devextreme/events/core/events_engine";
 
 function Comment(prop) {
     const [showProfile, setShowProfile] = useState(false);
     const [content, setContent] = useState(<></>);
+    const [likeCount, setLikeCount] = useState(0);
 
     useEffect(() => {
+        // set like count
+        setLikeCount(prop.likeCount)
         // process post content
         switch (prop.contentType){
             case "text/plain":
@@ -48,11 +52,23 @@ function Comment(prop) {
     }
 
     function likeComment() {
-        Ajax.post(
-            `service/authors/${Identity.GetIdentity().id}/posts/${prop.id.slice(-36)}/likes?origin=${prop.id.getNodeOrigin()}`,
-            {}
+        Ajax.get(
+            `service/authors/${Identity.GetIdentity().id}`
         ).then((resp) => {
-
+            Ajax.post(
+                `service/authors/${prop.author.id.getAuthorId()}/inbox?origin=${prop.author.id.getNodeOrigin()}`,
+                {
+                    type: "like",
+                    author: resp.data,
+                    object: prop.id,
+                    "@context": "https://www.w3.org/ns/activitystreams",
+                    summary: `${resp.data.displayName} liked your comment`
+                }
+            ).then(resp => {
+                setLikeCount(likeCount + 1);
+            }).catch(error => {
+                alert("You already liked this comment");
+            })
         }).catch(error => {
             alert("Failed to like comment");
         });
@@ -99,7 +115,7 @@ function Comment(prop) {
                 </Card.Body>
                 <Card.Footer>
                     <span className="text-muted" style={{fontSize: 10}}>{new Date(Date.parse(prop.published)).toString()}</span>
-                    <span className="float-end">{prop.likeCount ?? "Unknown"} likes</span>
+                    <a className="float-end" onClick={likeComment}>{likeCount ?? "Unknown"} likes</a>
                 </Card.Footer>
             </Card>
         </>

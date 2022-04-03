@@ -25,6 +25,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import reportWebVitals from './reportWebVitals';
 import Global from "./utility/Global";
 import Inbox from "./page/Inbox";
+import PostView from "./page/PostView";
 
 
 // endregion
@@ -60,6 +61,10 @@ ReactDOM.render(
 
                 <Route exact path='/inbox' element={<PrivateRoute/>}>
                     <Route exact path='/inbox' element={<Inbox/>}/>
+                </Route>
+
+                <Route exact path='/post' element={<PrivateRoute/>}>
+                    <Route exact path='/post' element={<PostView/>}/>
                 </Route>
                 {/* endregion */}
 
