@@ -25,8 +25,8 @@ function Comment(prop) {
     useEffect(() => {
         // set like count
         if (prop.likeCount === undefined){
-            //Ajax.get("")
-            setLikeCount(prop.likeCount)
+            getCommentLikes()
+            //setLikeCount(prop.likeCount)
         } else {
             setLikeCount(prop.likeCount)
         }
@@ -54,6 +54,19 @@ function Comment(prop) {
         } else {
             setShowProfile(true);
         }
+    }
+
+    function getCommentLikes() {
+        console.log(prop.id)
+        Ajax.get(`service/authors/${prop.id.getAuthorId()}/posts/${prop.id.getPostId()}/comments/${prop.id.getCommentId()}/likes?origin=${prop.author.id.getNodeOrigin()}`)
+            .then((resp) => {
+                let likes = resp.data.items ?? resp.data.likes ?? undefined
+                setLikeCount(likes.length);
+            })
+            .catch(error => {
+                alert("Comment from unknown node. Unable to get likes.");
+                console.log(error)
+            });
     }
 
     function likeComment() {

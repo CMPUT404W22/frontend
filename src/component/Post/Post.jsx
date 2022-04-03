@@ -76,6 +76,7 @@ function Post(prop) {
         Ajax.get(
             `service/authors/${Identity.GetIdentity().id}`
         ).then((resp) => {
+            resp.data["display_name"] = resp.data.displayName;
             Ajax.post(
                 `service/authors/${prop.author.id.getAuthorId()}/inbox?origin=${prop.author.id.getNodeOrigin()}`,
                 {
