@@ -8,10 +8,7 @@ import {
     Figure,
     FloatingLabel,
     Form,
-    Modal,
-    Row,
-    Toast,
-    ToastContainer
+    Row
 } from "react-bootstrap";
 
 
