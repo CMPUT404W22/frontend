@@ -72,6 +72,7 @@ function Inbox(prop) {
                                     return (
                                         <FollowingRequest
                                             actor={n.actor}
+                                            object={n.object}
                                             summary={n.summary}
                                         />
                                     );
