@@ -201,7 +201,7 @@ function Post(prop) {
                     <Row>
                         <Col>
                             <InputGroup>
-                                <Form.Control id="sharable-link" type="text" value={`https://cmput404-w22-project-frontend.herokuapp.com/post?id=${prop.id.slice(-36)}`} disabled/>
+                                <Form.Control id="sharable-link" type="text" value={`${window.location.host}/post/?post=${prop.id.slice(-36)}&author=${prop.id.getAuthorId()}&origin=${prop.id.getNodeOrigin()}`} disabled/>
                                 <InputGroup.Text>
                                     <FontAwesomeIcon icon={faCopy}
                                                      color={"grey"}
@@ -233,29 +233,31 @@ function Post(prop) {
                                 {prop.author.displayName ?? prop.author.display_name ?? "Unknown Author"}
                             </a>
                         </i>
-                        {prop.author.id.slice(-36) === Identity.GetIdentity().id ?
-                            <div className="float-end">
-                                <FontAwesomeIcon icon={faShareNodes}
-                                                 className="hover"
-                                                 color="grey"
-                                                 style={{marginRight: 10}}
-                                                 onClick={()=>setShowSharing(true)}
-                                />
-                                <FontAwesomeIcon icon={faPencil}
-                                                 className="hover"
-                                                 color="grey"
-                                                 style={{marginRight: 10}}
-                                                 onClick={()=>setShowEditor(true)}
-                                />
-                                <FontAwesomeIcon icon={faTrashCan}
-                                                 className="hover"
-                                                 color="grey"
-                                                 onClick={deletePost}
-                                />
-                            </div>
-                            :
-                            ""
-                        }
+                        <div className="float-end">
+                            <FontAwesomeIcon icon={faShareNodes}
+                                             className="hover"
+                                             color="grey"
+                                             style={{marginRight: 10}}
+                                             onClick={()=>setShowSharing(true)}
+                            />
+                            {prop.author.id.slice(-36) === Identity.GetIdentity().id ?
+                                <>
+                                    <FontAwesomeIcon icon={faPencil}
+                                                     className="hover"
+                                                     color="grey"
+                                                     style={{marginRight: 10}}
+                                                     onClick={()=>setShowEditor(true)}
+                                    />
+                                    <FontAwesomeIcon icon={faTrashCan}
+                                                     className="hover"
+                                                     color="grey"
+                                                     onClick={deletePost}
+                                    />
+                                </>
+                                :
+                                ""
+                            }
+                        </div>
                     </Card.Title>
 
                     <span className="text-muted" style={{fontSize: 10}}>{prop.description}</span>

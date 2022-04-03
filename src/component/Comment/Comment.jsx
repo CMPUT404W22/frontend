@@ -24,7 +24,12 @@ function Comment(prop) {
 
     useEffect(() => {
         // set like count
-        setLikeCount(prop.likeCount)
+        if (prop.likeCount === undefined){
+            //Ajax.get("")
+            setLikeCount(prop.likeCount)
+        } else {
+            setLikeCount(prop.likeCount)
+        }
         // process post content
         switch (prop.contentType){
             case "text/plain":
