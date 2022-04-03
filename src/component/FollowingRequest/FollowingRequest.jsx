@@ -1,36 +1,48 @@
-import React from "react";
+import React, {useEffect, useState} from "react";
 import "../../utility/NodeUtilities";
 import {Button, Card} from "react-bootstrap";
 import {Ajax} from "../../utility/Ajax";
+import Identity from "../../model/Identity";
 
 function FollowingRequest(prop) {
-    let disableButtons = false;
-    let summary = prop.summary;
+    const [disableButtons, setDisableButton] = useState(false);
+    const [summary, setSummary] = useState("");
 
-    function getSummary(){
-        return summary;
-    }
+    // prop not null implies edit mode, set contents
+    useEffect(() => {
+        const requestingAuthorId = prop.actor.id.slice(-36);
+        setSummary(prop.summary);
 
-    function setSummary(newSummary) {
-        summary = newSummary;
-    }
+        Ajax.get(
+            `service/authors/${Identity.GetIdentity().id}/followerRequests/${requestingAuthorId}`
+        ).then(resp => {
+            if(resp.data.length > 0){
+                setDisableButton(false);        
+            } else{
+                setSummary(prop.summary + " [ACTION COMPLETED]");
+                setDisableButton(true);
+            }
+        }).catch(error => {
+            setDisableButton(true);
+            alert("Failed to get follow request");
+            console.error("FollowingRequest useEffect: ", error);
+        });
+    }, [""])
 
     function acceptFollowRequest(){        
         // 1. delete the request from FollowRequest table
         // 2. add follower to Following table
-        const requestingAuthorId = prop.object.id.slice(-36);
+        const requestingAuthorId = prop.actor.id.slice(-36);
 
         Ajax.delete(
             `service/authors/${Identity.GetIdentity().id}/followerRequests/${requestingAuthorId}`
         ).then((resp) => {
-            disableButtons = true;
+            setDisableButton(true);
 
             Ajax.put(
                 `service/authors/${Identity.GetIdentity().id}/followers/${requestingAuthorId}`
             ).then(() => {
-                const newSummary = "Accepted " + prop.object.displayName + "'s follow request";
-                setSummary(newSummary);
-
+                alert("Accepted follow request");
                 window.location.reload();
             }).catch(error => {
                 alert("Failed to accept follow request");
@@ -44,15 +56,13 @@ function FollowingRequest(prop) {
     }
 
     function deleteFollowRequest(){
-        const requestingAuthorId = prop.object.id.slice(-36);
+        const requestingAuthorId = prop.actor.id.slice(-36);
 
         Ajax.delete(
             `service/authors/${Identity.GetIdentity().id}/followerRequests/${requestingAuthorId}`
         ).then((resp) => {
-            const newSummary = "Declined " + prop.object.displayName + "'s follow request";
-            setSummary(newSummary);
-
-            disableButtons = true;
+            alert("Declined follow request");
+            setDisableButton(true);
             window.location.reload();
         }).catch(error => {
             alert("Failed to delete follow request");
@@ -66,10 +76,10 @@ function FollowingRequest(prop) {
                 <Card.Body>
                     <Card.Title>
                         <span style={{verticalAlign: "sub"}}>
-                            {getSummary}
+                            {summary}
                         </span>
                         <Button className={"float-end"} disabled={disableButtons} onClick={acceptFollowRequest}>Accept</Button>
-                        <Button className={"float-end"} disabled={disableButtons} onClick={deleteFollowRequest}>Decline</Button>
+                        <Button className={"float-end"} disabled={disableButtons} onClick={deleteFollowRequest} style={{background:"red"}}>Decline</Button>
                     </Card.Title>
                 </Card.Body>
             </Card>
