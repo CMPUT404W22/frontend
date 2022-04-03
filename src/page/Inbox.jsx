@@ -36,7 +36,6 @@ function Inbox(prop) {
         Ajax.get(
             `service/authors/${Identity.GetIdentity().id}/inbox`,
         ).then((resp) => {
-            console.log(resp.data.items)
             setInbox(resp.data.items);
             setLoading(false);
         }).catch(error => {
