@@ -36,7 +36,6 @@ function Inbox(prop) {
         Ajax.get(
             `service/authors/${Identity.GetIdentity().id}/inbox`,
         ).then((resp) => {
-            console.log(resp.data.items)
             setInbox(resp.data.items);
             setLoading(false);
         }).catch(error => {
@@ -72,6 +71,7 @@ function Inbox(prop) {
                                     return (
                                         <FollowingRequest
                                             actor={n.actor}
+                                            object={n.object}
                                             summary={n.summary}
                                         />
                                     );
