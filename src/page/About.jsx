@@ -5,7 +5,7 @@ import {Container} from "react-bootstrap";
 function About(prop) {
     return (
         <Container>
-            About
+            Welcome to T5's Social Distribution web application!
         </Container>
     )
 }
