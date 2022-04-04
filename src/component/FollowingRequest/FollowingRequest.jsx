@@ -14,59 +14,37 @@ function FollowingRequest(prop) {
         setSummary(prop.summary);
 
         Ajax.get(
-            `service/authors/${Identity.GetIdentity().id}/followerRequests/${requestingAuthorId}`
+            `service/authors/${Identity.GetIdentity().id}/followers/${requestingAuthorId}
+                ?origin=local&actor_id=${prop.actor.id}&object_id=${prop.object.id}`
         ).then(resp => {
             if(resp.data.length > 0){
-                setDisableButton(false);        
-            } else{
-                setSummary(prop.summary + " [ACTION COMPLETED]");
+                setSummary(prop.summary + " [ACCEPTED REQUEST]");
                 setDisableButton(true);
+            } else{
+                setDisableButton(false);
             }
         }).catch(error => {
             setDisableButton(true);
-            alert("Failed to get follow request");
+            alert("Failed get request to service/authors/author_id/followers/requesting_author_id?origin=local");
             console.error("FollowingRequest useEffect: ", error);
         });
     }, [""])
 
-    function acceptFollowRequest(){        
-        // 1. delete the request from FollowRequest table
-        // 2. add follower to Following table
+    function acceptFollowRequest(){
         const requestingAuthorId = prop.actor.id.slice(-36);
 
-        Ajax.delete(
-            `service/authors/${Identity.GetIdentity().id}/followerRequests/${requestingAuthorId}`
-        ).then((resp) => {
-            setDisableButton(true);
-
-            Ajax.put(
-                `service/authors/${Identity.GetIdentity().id}/followers/${requestingAuthorId}`
-            ).then(() => {
-                alert("Accepted follow request");
-                window.location.reload();
-            }).catch(error => {
-                alert("Failed to accept follow request");
-                console.error("acceptFollowRequest, failed to send PUT: ", error);
-            });
-
-        }).catch(error => {
-            alert("Failed to accept follow request");
-            console.error("acceptFollowRequest, failed to send DELETE: ", error);
-        });
-    }
-
-    function deleteFollowRequest(){
-        const requestingAuthorId = prop.actor.id.slice(-36);
-
-        Ajax.delete(
-            `service/authors/${Identity.GetIdentity().id}/followerRequests/${requestingAuthorId}`
-        ).then((resp) => {
-            alert("Declined follow request");
+        Ajax.put(
+            `service/authors/${Identity.GetIdentity().id}/followers/${requestingAuthorId}`,
+            {
+                actor: prop.actor,
+                object: prop.object
+            }
+        ).then(() => {
             setDisableButton(true);
             window.location.reload();
         }).catch(error => {
-            alert("Failed to delete follow request");
-            console.error("deleteFollowRequest: ", error);
+            alert("Failed to accept follow request");
+            console.error("acceptFollowRequest, failed to send PUT: ", error);
         });
     }
 
@@ -79,7 +57,6 @@ function FollowingRequest(prop) {
                             {summary}
                         </span>
                         <Button className={"float-end"} disabled={disableButtons} onClick={acceptFollowRequest}>Accept</Button>
-                        <Button className={"float-end"} disabled={disableButtons} onClick={deleteFollowRequest} style={{background:"red"}}>Decline</Button>
                     </Card.Title>
                 </Card.Body>
             </Card>
