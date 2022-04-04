@@ -17,7 +17,7 @@ function FollowingRequest(prop) {
             `service/authors/${Identity.GetIdentity().id}/followers/${requestingAuthorId}
                 ?origin=local&actor_id=${prop.actor.id}&object_id=${prop.object.id}`
         ).then(resp => {
-            if(resp.data.length > 0){
+            if(resp.data == true){
                 setSummary(prop.summary + " [ACCEPTED REQUEST]");
                 setDisableButton(true);
             } else{
