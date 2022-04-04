@@ -23,12 +23,18 @@ function Profile(prop) {
     // region profile
     const [displayName, setDisplayName] = useState("");
     const [github, setGithub] = useState("");
+    const [image, setImage] = useState("")
+    const [host, setHost] = useState("")
+    const [otherId, setOtherID] = useState("")
     const [profileImage, setProfileImage] = useState("");
     const [cancelEdit, setCancelEdit] = useState(false);
     const [edit, setEdit] = useState(false);
     const [loading, setLoading] = useState(false);
     const [following, setFollowing] = useState(false);
+    const [followed, setFollowed] = useState(false)
     const [buttonText, setButtonText] = useState("Follow");
+    const [followers, setFollowers] = useState([]);
+    const [friend, setFriend] = useState(false);
 
     useEffect(() => {
         if (prop.content === undefined) { // viewing their own profile
@@ -45,16 +51,29 @@ function Profile(prop) {
                     alert("Failed to get user profile.")
                     setTimeout(()=>window.location.reload(), 4000);
                 });
+            Ajax.get(`service/authors/${Identity.GetIdentity().id}/followers?origin=local`)
+                .then((resp) => {
+                    console.log("follower", resp.data.items)
+                    setFollowers(resp.data.items)
+                })
         } else { // viewing others profile
+            console.log("prop", prop.content)
+            setOtherID(prop.content.id)
             setDisplayName(prop.content.displayName ?? prop.content.display_name);
             setGithub(prop.content.github);
+            setImage(prop.content.profileImage);
             setProfileImage(prop.content.profileImage ?? "https://dummyimage.com/180x180/aaa/fff");
+            setHost(prop.content.host)
             setCancelEdit(false);
             setLoading(false);
-
-            Ajax.get(`service/authors/${prop.content.id.slice(-36)}/followers/${Identity.GetIdentity().id}`)
+            Ajax.get(`service/authors/${prop.content.id.slice(-36)}/followers?origin=local`)
                 .then((resp) => {
-                    console.log(resp)
+                    console.log("follower", resp.data.items)
+                    setFollowers(resp.data.items)
+                })
+            Ajax.get(`service/authors/${prop.content.id.slice(-36)}/followers/${Identity.GetIdentity().id}?origin=${prop.content.id.getNodeOrigin()}`)
+                .then((resp) => {
+                    // console.log(resp)
                     if (resp.data.length > 0) {
                         setFollowing(true)
                     }
@@ -62,6 +81,22 @@ function Profile(prop) {
                 .catch(error => {
                     alert("Unable to get following status.")
                 });
+            Ajax.get(`service/authors/${Identity.GetIdentity().id}/followers/${prop.content.id.slice(-36)}?origin=${prop.content.id.getNodeOrigin()}`)
+                .then((resp) => {
+                    // console.log(resp)
+                    if (resp.data.length > 0) {
+                        setFollowed(true)
+                    }
+                })
+                .catch(error => {
+                    alert("Unable to get following status.")
+                });
+            if (following){
+                if (followed){
+                    setFriend(true)
+                }
+            }
+            console.log("if friend",friend)
         }
     }, ["", cancelEdit])
 
@@ -89,7 +124,6 @@ function Profile(prop) {
     function sendFollowRequest() {
         // sends a follow request
         let user;
-        let to_follow;
         let summary;
 
         setButtonText("Requested")
@@ -97,26 +131,30 @@ function Profile(prop) {
         Ajax.get(`service/authors/${Identity.GetIdentity().id}/`)
             .then(resp => {
                 user = resp.data;
-                Ajax.get(`service/authors/${prop.content.id.slice(-36)}/`)
-                    // gets the author the user wants to follow
-                    .then (resp => {
-                        to_follow = resp.data;
-                        summary = user.displayName + " wants to follow " + to_follow.displayName;
-                        Ajax.post(
-                            // sends a follow notification to the author to follow's inbox
-                            `service/authors/${prop.content.id.slice(-36)}/inbox`,
-                            {
-                                type: "follow",
-                                summary: summary,
-                                actor: user,
-                                object: to_follow,
-                            }
-                        ).then((resp) => {
-                            setLoading(false);
-                        }).catch(error => {
-                            alert("Failed to send followers request");
-                        });
-                    });
+                let to_follow = {
+                    type: "author",
+                    id: otherId,
+                    url: otherId,
+                    host: host,
+                    displayName: displayName,
+                    github: github,
+                    profileImage: image
+                }
+                summary = user.displayName + " wants to follow " + to_follow.displayName;
+                Ajax.post(
+                    // sends a follow notification to the author to follow's inbox
+                    `service/authors/${prop.content.id.slice(-36)}/inbox?origin=${prop.content.id.getNodeOrigin()}`,
+                    {
+                        type: "follow",
+                        summary: summary,
+                        actor: user,
+                        object: to_follow,
+                    }
+                ).then((resp) => {
+                    setLoading(false);
+                }).catch(error => {
+                    alert("Failed to send followers request");
+                });
         }).catch(error => {
             alert("Failed to get author data")
         });
@@ -125,7 +163,7 @@ function Profile(prop) {
     function removeFollowing() {
         setFollowing(false);
         Ajax.delete(
-            `service/authors/${prop.content.id.slice(-36)}/followers/${Identity.GetIdentity().id}`
+            `service/authors/${prop.content.id.slice(-36)}/followers/${Identity.GetIdentity().id}?origin=${prop.content.id.getNodeOrigin()}`
         ).then(resp => {
             window.location.reload();
         }).catch(error => {
@@ -134,6 +172,22 @@ function Profile(prop) {
         })
     }
 
+    const renderCard = (card, index) => {
+        return (
+            <Card style = {{margin: '30px'}} key = {index}>
+                <Card.Header>
+                    Followers
+                </Card.Header>
+                <Card.Body>
+                    <Row>
+                        <Col>
+                            <Card.Text>{card.displayName}</Card.Text>
+                        </Col>
+                    </Row>
+                </Card.Body>
+            </Card>
+        )
+    }
 
     // endregion
 
@@ -164,11 +218,14 @@ function Profile(prop) {
                                     <Col style={{textAlign:"center"}}>
                                         {
                                             following ?
-                                                <Button onClick={removeFollowing}>
-                                                    Unfollow
-                                                </Button>
-                                                :
-                                                <Button onClick={sendFollowRequest}>
+                                                friend ?
+                                                    <Button onClick={removeFollowing}>
+                                                        Unfriend
+                                                    </Button>
+                                                    :<Button onClick={removeFollowing}>
+                                                        Unfollow
+                                                    </Button>
+                                                :<Button onClick={sendFollowRequest}>
                                                     {buttonText}
                                                 </Button>
 
@@ -201,6 +258,16 @@ function Profile(prop) {
                                             <Form.Control type="text" value={profileImage}
                                                           onChange={(e) => setProfileImage(e.target.value)}/>
                                         </FloatingLabel>
+                                    </Col>
+                                </Row>
+                                <br/>
+                                <Row>
+                                    <Col>
+                                        {
+                                            followers.length > 0 ?
+                                            followers.map(renderCard) :
+                                            <h6>There is no follower.</h6>
+                                        }
                                     </Col>
                                 </Row>
                                 <br/>
