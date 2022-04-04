@@ -34,7 +34,7 @@ function Profile(prop) {
     const [followed, setFollowed] = useState(false)
     const [buttonText, setButtonText] = useState("Follow");
     const [followers, setFollowers] = useState([]);
-    const [friend, setFriend] = useState(false);
+    const [actor_id] = useState("https://cmput404-w22-project-backend.herokuapp.com/authors/"+Identity.GetIdentity().id)
 
     useEffect(() => {
         if (prop.content === undefined) { // viewing their own profile
@@ -57,7 +57,7 @@ function Profile(prop) {
                     setFollowers(resp.data.items)
                 })
         } else { // viewing others profile
-            console.log("prop", prop.content)
+            // console.log("prop", prop.content)
             setOtherID(prop.content.id)
             setDisplayName(prop.content.displayName ?? prop.content.display_name);
             setGithub(prop.content.github);
@@ -66,37 +66,31 @@ function Profile(prop) {
             setHost(prop.content.host)
             setCancelEdit(false);
             setLoading(false);
-            Ajax.get(`service/authors/${prop.content.id.slice(-36)}/followers?origin=local`)
+            Ajax.get(`service/authors/${prop.content.id.slice(-36)}/followers?origin=${prop.content.id.getNodeOrigin()}
+            `)
                 .then((resp) => {
                     console.log("follower", resp.data.items)
                     setFollowers(resp.data.items)
                 })
-            Ajax.get(`service/authors/${prop.content.id.slice(-36)}/followers/${Identity.GetIdentity().id}?origin=${prop.content.id.getNodeOrigin()}`)
+                .catch(error => {
+                    alert("Unable to get followers.")
+                });
+            Ajax.get(`service/authors/${prop.content.id.slice(-36)}/followers/${Identity.GetIdentity().id}?origin=${prop.content.id.getNodeOrigin()}&actor_id=${actor_id}&object_id=${prop.content.id}`)
                 .then((resp) => {
-                    // console.log(resp)
-                    if (resp.data.length > 0) {
-                        setFollowing(true)
-                    }
+                    console.log("following", resp.data)
+                    setFollowing(resp.data)
                 })
                 .catch(error => {
                     alert("Unable to get following status.")
                 });
-            Ajax.get(`service/authors/${Identity.GetIdentity().id}/followers/${prop.content.id.slice(-36)}?origin=${prop.content.id.getNodeOrigin()}`)
+            Ajax.get(`service/authors/${Identity.GetIdentity().id}/followers/${prop.content.id.slice(-36)}?origin=local&object_id=${actor_id}&actor_id=${prop.content.id}`)
                 .then((resp) => {
-                    // console.log(resp)
-                    if (resp.data.length > 0) {
-                        setFollowed(true)
-                    }
+                    console.log("followed", resp.data)
+                    setFollowed(resp.data)
                 })
                 .catch(error => {
-                    alert("Unable to get following status.")
+                    alert("Unable to get friend status.")
                 });
-            if (following){
-                if (followed){
-                    setFriend(true)
-                }
-            }
-            console.log("if friend",friend)
         }
     }, ["", cancelEdit])
 
@@ -163,9 +157,10 @@ function Profile(prop) {
     function removeFollowing() {
         setFollowing(false);
         Ajax.delete(
-            `service/authors/${prop.content.id.slice(-36)}/followers/${Identity.GetIdentity().id}?origin=${prop.content.id.getNodeOrigin()}`
+            `service/authors/${prop.content.id.slice(-36)}/followers/${Identity.GetIdentity().id}?origin=${prop.content.id.getNodeOrigin()}&follower=${otherId}`
         ).then(resp => {
-            window.location.reload();
+            console.log("deleted")
+            // window.location.reload();
         }).catch(error => {
             alert("Failed to remove follower.")
             setTimeout(()=>window.location.reload(), 4000);
@@ -218,7 +213,7 @@ function Profile(prop) {
                                     <Col style={{textAlign:"center"}}>
                                         {
                                             following ?
-                                                friend ?
+                                                followed ?
                                                     <Button onClick={removeFollowing}>
                                                         Unfriend
                                                     </Button>
