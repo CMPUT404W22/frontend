@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from "react";
 
-import {Card, Col, Modal, Row, Form, InputGroup} from "react-bootstrap";
+import {Card, Col, Modal, Row, Form, InputGroup, Button} from "react-bootstrap";
 
 import DOMPurify from 'dompurify';
 
@@ -20,6 +20,7 @@ import Profile from "../Profile/Profile";
 import {Ajax} from "../../utility/Ajax";
 import CommentEditor from "../CommentEditor/CommentEditor";
 import Comment from "../Comment/Comment";
+import Select from "react-select/base";
 
 function Post(prop) {
     const [content, setContent] = useState(<></>);
@@ -29,6 +30,9 @@ function Post(prop) {
     const [comments, setComments] = useState([]);
     const [commentElements, setCommentElements] = useState(<></>);
     const [showSharing, setShowSharing] = useState(false);
+    const [friends, setFriends] = useState([]);
+    const [friendsOption, setFriendsOption] = useState(<></>);
+    const [selectedFriend, setSelectFriend] = useState("");
 
     const [likeCount, setLikeCount] = useState(0);
 
@@ -62,6 +66,9 @@ function Post(prop) {
 
         // get likes
         if (prop.id.getNodeOrigin() !== "local") getLikes();
+
+        // get friends
+        getFriends()
     }, [""]);
 
     function displayProfile(){
@@ -94,6 +101,36 @@ function Post(prop) {
         }).catch(error => {
            alert("Failed to like post");
         });
+    }
+
+    function sharePost() {
+        if (selectedFriend !== "0") {
+            Ajax.post(
+                `service/authors/${prop.author.id.getAuthorId()}/inbox?origin=${prop.author.id.getNodeOrigin()}`,
+                {
+                    type: prop.type,
+                    title: prop.title,
+                    id: prop.id,
+                    description: prop.description,
+                    contentType: prop.contentType,
+                    content: prop.content,
+                    author: prop.author,
+                    categories: prop.categories,
+                    count: prop.count,
+                    comments: prop.comments,
+                    published: prop.published,
+                    visibility: prop.visibility,
+                    unlisted: prop.unlisted,
+                    image: prop.image,
+                    likeCount: prop.likeCount,
+                    commentsSrc: prop.commentsSrc,
+                }
+            ).then(resp => {
+                alert("Post sent to author");
+            }).catch(error => {
+                alert("failed to send post to author");
+            });
+        }
     }
 
     function openComments() {
@@ -140,7 +177,9 @@ function Post(prop) {
     }
 
     function getFriends() {
-        Ajax.get(`service/authors/${Identity.GetIdentity().id}/friends`)
+        Ajax.get(`service/authors/${Identity.GetIdentity().id}/friends`).then(resp => {
+            setFriends(resp.data.items);
+        });
     }
 
     function deletePost() {
@@ -211,9 +250,22 @@ function Post(prop) {
                                 </InputGroup.Text>
                             </InputGroup>
                         </Col>
-                        <Row>
-
-                        </Row>
+                    </Row>
+                    <br/>
+                    <Row>
+                        <Col className={"col-9"}>
+                            <Form.Select onChange={e => {setSelectFriend(e.target.value);}}>
+                                <option value={0} selected>---</option>
+                                {
+                                    friends.map(f => {
+                                        return <option value={f.id}>{f.displayName ?? f.display_name}</option>
+                                    })
+                                }
+                            </Form.Select>
+                        </Col>
+                        <Col className={"col-3 d-grid gap-2"}>
+                            <Button onClick={sharePost}>Share</Button>
+                        </Col>
                     </Row>
                 </Modal.Body>
             </Modal>
