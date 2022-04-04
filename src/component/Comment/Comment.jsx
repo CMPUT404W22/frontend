@@ -15,7 +15,6 @@ import Identity from "../../model/Identity";
 
 import Profile from "../Profile/Profile";
 import {Ajax} from "../../utility/Ajax";
-import {set} from "devextreme/events/core/events_engine";
 
 function Comment(prop) {
     const [showProfile, setShowProfile] = useState(false);
@@ -94,7 +93,7 @@ function Comment(prop) {
 
     function deleteComment() {
         Ajax.delete(
-            `service/authors/${Identity.GetIdentity().id}/posts/${prop.id.slice(-36)}/comments/${prop.id.slice(-36)}`
+            `service/authors/${prop.id.getAuthorId()}/posts/${prop.id.getPostId()}/comments/${prop.id.getCommentId()}`
         ).then((resp) => {
             window.location.reload();
         }).catch(error => {

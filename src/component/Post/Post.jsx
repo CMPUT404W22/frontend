@@ -101,7 +101,6 @@ function Post(prop) {
         setCommentElements(
             <>
                 {comments.map(c => {
-                    console.log(c)
                     return (
                         <Comment
                             key={c.id}
@@ -184,12 +183,7 @@ function Post(prop) {
                 </Modal.Header>
                 <Modal.Body>
                     {commentElements}
-                    {
-                        prop.id.getNodeOrigin() === "local" ?
-                            <CommentEditor id={prop.id}/>
-                            :
-                            ""
-                    }
+                    <CommentEditor id={prop.id}/>
                 </Modal.Body>
             </Modal>
 
