@@ -157,7 +157,7 @@ function Profile(prop) {
     function removeFollowing() {
         setFollowing(false);
         Ajax.delete(
-            `service/authors/${prop.content.id.slice(-36)}/followers/${Identity.GetIdentity().id}?origin=${prop.content.id.getNodeOrigin()}&follower=${otherId}`
+            `service/authors/${prop.content.id.slice(-36)}/followers/${Identity.GetIdentity().id}?origin=${prop.content.id.getNodeOrigin()}&following=${otherId}&follower=${actor_id}`
         ).then(resp => {
             console.log("deleted")
             // window.location.reload();
