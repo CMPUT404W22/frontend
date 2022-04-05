@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const BackendAddress = " https://cmput404-w22-project-backend.herokuapp.com/";
+const BackendAddress = "https://cmput404-w22-project-backend.herokuapp.com/";
 
 class Ajax {
     /**
