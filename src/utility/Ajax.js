@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const BackendAddress = "https://cmput404-w22-project-backend.herokuapp.com/";
+const BackendAddress = process.env.NODE_ENV === "production" ? process.env.REACT_APP_PRODUCTION_API : process.env.REACT_APP_LOCAL_API_HOST
 
 class Ajax {
     /**
